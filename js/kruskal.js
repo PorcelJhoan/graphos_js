@@ -2,24 +2,24 @@ var container = document.getElementById("mynetwork");
 var nodes = new vis.DataSet();
 var edges = new vis.DataSet();
 var flag=0;
-
+var nombres = [];
 var options = {
   nodes:{
     physics: false,
     color: {
-      border: 'white',
-      background: 'rgba(255, 226, 132, 0.877)',
+      border: '#8A29DF',
+      background: '#8A29DF',
       highlight: {
-        border: 'white',
-        background: '#113c75'
+        border: '#5F03AF',
+        background: '#5F03AF'
       },
       hover: {
-        border: 'white',
-        background: 'rgba(255, 280, 132, 0.877);'
+        border: '#1559b3',
+        background: '#113c75'
       }
     },
     font: {
-      color: 'black',
+      color: '#ffffff',
     }
   },
   edges:{
@@ -43,48 +43,69 @@ var options = {
     initiallyActive: false,
     addNode: function (nodeData, callback) {
       Swal.fire({
-        title: "Nodo",
+        title: "Nombre del nodo",
         input: "text",
         showCancelButton: true,
-        confirmButtonText: "Ok",
-        cancelButtonText: "Cancel",
+        confirmButtonText: "Aceptar",
+        cancelButtonText: "Cancelar",
         inputValidator: nombre => {
             if (!nombre) {
-                return "Escribe el nombre del nodo";
+                return "Por favor escribe el nombre del nodo";
             } else {
                 return undefined;
             }
         }
     }).then(resultado => {
-        if (resultado.value) {
+      var no = true;
+      var n = nodes;
+      for(var i=0;i<nombres.length;i++)
+      {
+        console.log(nodes[i]);
+        if(nodes != null){
+          if(resultado.value == nombres[i]  )
+        {
+         
+             no=false;
+          break;
+        }
+        }
+      }
+        if(no){
+          if (resultado.value) {
             var auxid = 0;
             let nombre = resultado.value;
             console.log("Hola, " + nombre);
             nodeData.label=nombre;
+            nombres.push(nombre);
             if(nodes.length!=0){
               nodes.forEach((node)=>{
-                auxid=node.id;
+               auxid=node.id;
               });
               auxid++;
-            };
-            nodeData.ttp="";
-            nodeData.tpp="";
-            nodeData.id=auxid;
-            nodes.add(nodeData);
-            callback(nodeData);
+          };
+          nodeData.ttp="";
+          nodeData.tpp="";
+          nodeData.id=auxid;
+          nodes.add(nodeData);
+          callback(nodeData);
+          no = true;
+      }
+      
+        }else{
+          alert("Ese nombre esta en uso");
         }
     });
     },
     addEdge: function (data, callback) {
         Swal.fire({
-            title: "Valor",
+            title: "Ingrese un valor",
             input: "text",
             showCancelButton: true,
-            confirmButtonText: "Ok",
-            cancelButtonText: "Cancel",
+            confirmButtonText: "Guardar",
+            cancelButtonText: "Cancelar",
             inputValidator: nombre => {
                 if (!nombre) {
-                    return "Ingrese un valor";
+                    return "Por favor ingrese un valor";
                 } else {
                     return undefined;
                 }
@@ -102,14 +123,14 @@ var options = {
     },
     editNode: function (nodeData,callback) {
       Swal.fire({
-        title: "Nodo",
+        title: "Nombre del nodo",
         input: "text",
         showCancelButton: true,
-        confirmButtonText: "Ok",
-        cancelButtonText: "Cancel",
+        confirmButtonText: "Aceptar",
+        cancelButtonText: "Cancelar",
         inputValidator: nombre => {
             if (!nombre) {
-                return "Escribe el nombre del nodo";
+                return "Por favor escribe el nombre del nodo";
             } else {
                 return undefined;
             }
@@ -129,14 +150,14 @@ var options = {
     },
     editEdge: function (data, callback) {
       Swal.fire({
-        title: "Valor",
+        title: "Ingrese un valor",
         input: "text",
         showCancelButton: true,
-        confirmButtonText: "Ok",
-        cancelButtonText: "Cancel",
+        confirmButtonText: "Guardar",
+        cancelButtonText: "Cancelar",
         inputValidator: nombre => {
             if (!nombre) {
-                return "Ingrese un valor";
+                return "Por favor ingrese un valor";
             } else {
                 return undefined;
             }
@@ -188,7 +209,7 @@ function llenarTabla(){
   
   mat= Array(nodes.length).fill(0).map(() => Array(nodes.length).fill(0));
 
-  var body =  document.getElementById("ggg");
+  var body = document.getElementsByTagName("body")[0];
 
   var tbl = document.createElement("table");
   var tblHead = document.createElement("thead");
@@ -302,7 +323,232 @@ function llenarTabla(){
 
 
     function johnson(){
-       edges.forEach((edge)=>{
+      document.getElementById('referencia').style.visibility = 'visible';
+      nodes.forEach((node)=>{
+        nodes.update({id:node.id,color:{background:"#939A9A"}});;
+      });
+      edges.forEach((edge)=>{
+        edges.update({id:edge.id,label:edge.valor,color:{color:"#939A9A"}});;
+      });
+
+      var tpp=[];
+      var tppf=[];
+      var ttp=[];
+      var ttpf=[];
+      var holguras=[];
+      var fflag=0;
+      var idn=0;
+      var res=0;
+      var max=0;
+      var idm=0;
+      tpp.push({idn , res});
+      edges.forEach((edge)=>{ 
+        var ffrom=edge.from;
+        var valor=edge.valor;
+        tpp.forEach((a)=>{
+            if(a.idn==ffrom)
+            {
+              res=parseInt(a.res)+parseInt(valor);
+              idn=edge.to;
+              tpp.push({idn,res});
+            }
+          });
+      });
+      tpp.forEach((a)=>{
+        var aid=a.idn;
+        var ares=a.res;
+        var ff=0;
+        if(fflag==0){
+          tppf.push({aid,ares});
+          fflag=1;
+        }
+        else{
+          tppf.forEach((af)=>{
+            if(af.aid==aid){
+              if(parseInt(af.ares)<parseInt(ares))
+              {
+                af.ares=ares;
+              }
+              ff=1;
+            }
+          });
+          if(ff==0){
+            tppf.push({aid,ares});
+          }
+        }
+      });
+
+      tppf.forEach((a)=>{
+        if(a.ares>max){
+          max=a.ares;
+          idm=a.aid;
+        }
+      });
+      ttp.push({idm,max});
+
+    for(var ic=0;ic<tpp.length;ic++){
+      ttp.forEach((a)=>{
+        var iid=a.idm;
+        edges.forEach((edge)=>{
+            var tto=edge.to;
+            var valor=edge.valor;
+            if(iid==tto){
+              max=parseInt(a.max)-parseInt(valor);
+              idm=edge.from;
+              ttp.push({idm,max});
+            }
+        });
+      });
+    }
+      ttp.forEach((a)=>{
+        var aid=a.idm;
+        var ares=a.max;
+        var ff=0;
+        if(fflag==0){
+          ttpf.push({aid,ares});
+          fflag=1;
+        }
+        else{
+          ttpf.forEach((af)=>{
+            if(af.aid==aid){
+              if(parseFloat(af.ares)>=parseFloat(ares))
+              {
+                af.ares=ares;
+              }
+              ff=1;
+            }
+          });
+          if(ff==0){
+            ttpf.push({aid,ares});
+          }
+        }
+      });      
+      nodes.forEach((node)=>{
+        tppf.forEach((a)=>{
+          ttpf.forEach((b)=>{
+            if(node.id==a.aid && node.id==b.aid){
+              nodes.update({id:node.id,ttp:a.ares,tpp:b.ares,title:"ttp:"+a.ares+" | tpp: "+b.ares}); 
+            }
+          });
+        });
+      });
+      
+      edges.forEach((edge)=>{
+        var vttp=0;
+        var vtpp=0;
+        var vto=edge.to;
+        var vfrom=edge.from;
+        var idee=edge.id;
+        var valor=0;
+        valor=parseInt(edge.valor);
+        nodes.forEach((node)=>{
+            if(node.id==vfrom){
+              vttp=parseInt(node.ttp);           
+            }
+            if(node.id==vto){
+              vtpp=parseInt(node.tpp);
+            }
+        });
+        var holg=vtpp-vttp-valor;
+        holguras.push({idee,holg,vtpp,vttp,valor});
+        edges.update({id:edge.id,sublabel1:"h="+holg});
+      });
+      console.log("hols");
+      console.log(holguras);
+      edges.forEach((edge)=>{
+        if(edge.sublabel1=="h=0")
+        {
+          edges.update({id:edge.id,label:edge.label+"\n"+edge.sublabel1,color:{color:"#8AE35F"}}); 
+          nodes.update({id:edge.to,color:{background:"#8AE35F"}});
+          nodes.update({id:edge.from,color:{background:"#8AE35F"}});
+
+        }
+        else{
+          edges.update({id:edge.id,label:edge.label+"\n"+edge.sublabel1});
+           
+        }
+       
+      });
+      
+        
+      
+      
+    }
+    function kruskal(){
+      document.getElementById('referencia').style.visibility = 'visible';
+      nodes.forEach((node)=>{
+        nodes.update({id:node.id,color:{background:"#939A9A"}});;
+      });
+      edges.forEach((edge)=>{
+        edges.update({id:edge.id,label:edge.valor,color:{color:"#939A9A"}});;
+      });
+
+      var valores=[];
+      var froms=[];
+      var tos=[];
+      var x=0;
+      var i=0;
+      edges.forEach((edge)=>{ 
+        valores.push(edge.valor);
+        valores.sort();
+        valores.reverse();
+        console.log(valores);
+      });
+      const result = valores.reduce((acc,item)=>{
+        if(!acc.includes(item)){
+          acc.push(item);
+        }
+        return acc;
+      },[])
+      console.log(result);
+      var p=1;
+      for(var l=0;l<valores.length;l++)
+      {
+        console.log("PPP");
+        if(i%2==0)
+        {
+          p=p+1;
+        }
+        edges.forEach((edge)=>{
+          x=0;
+          console.log("llll");
+          if(edge.valor==result[i])
+          {
+            console.log(result[i]);
+            console.log(froms);
+            console.log(tos);
+            const even = (element) => element == edge.to;
+            const even1 = (element) => element == edge.from;
+            if(tos.some(even))
+            {
+              x=x+1;
+            }
+            if(tos.some(even1))
+            {
+              x=x+1;
+            }
+            if(froms.some(even))
+            {
+              x=x+1;
+            }
+            if(froms.some(even1))
+            {
+              x=x+1;
+            }
+            if(x<p)
+            {
+              edges.update({id:edge.id,label:edge.label+"\n"+edge.sublabel1,color:{color:"#8AE35F"}}); 
+              froms.push(edge.from);
+              tos.push(edge.to);
+            }  
+          }       
+        });
+        i=i+1;
+      }   
+      
+    }
+    function kruskal2() {
+        edges.forEach((edge)=>{
             if(edge.valor<0){
                 edge.valor= edge.valor * -1;
             }
@@ -380,10 +626,10 @@ function llenarTabla(){
         console.log(g.V); // display 6, which is the number of vertices in g
         console.log(g.adj(0)); // display [5, 1, 2], which is the adjacent list to vertex 0
     
-    }
-
-    function johnson1(){
-document.getElementById('referencia').style.visibility = 'visible';
+          }
+          
+    function kruskal1() {
+    document.getElementById('referencia').style.visibility = 'visible';
       nodes.forEach((node)=>{
         nodes.update({id:node.id,color:{background:"#000080"}});;
       });
@@ -457,7 +703,8 @@ document.getElementById('referencia').style.visibility = 'visible';
     console.log(g.adj(0)); // display [5, 1, 2], which is the adjacent list to vertex 0
 
       }
-var jsgraphs = jsgraphs || {};
+
+      var jsgraphs = jsgraphs || {};
 
       (function(jss){
           
