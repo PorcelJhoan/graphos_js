@@ -1668,3 +1668,185 @@ var jsgraphs = jsgraphs || {};
 
       
       console.log(edges.to);
+
+
+      function johnson2(){
+        document.getElementById('referencia').style.visibility = 'visible';
+        nodes.forEach((node)=>{
+          nodes.update({id:node.id,color:{background:"#939A9A"}});;
+        });
+        edges.forEach((edge)=>{
+          edges.update({id:edge.id,label:edge.valor,color:{color:"#939A9A"}});;
+        });
+  
+        var tpp=[];
+        var tppf=[];
+        var ttp=[];
+        var ttpf=[];
+        var holguras=[];
+        var fflag=0;
+        var idn=0;
+        var res=0;
+        var max=0;
+        var idm=0;
+        tpp.push({idn , res});
+        edges.forEach((edge)=>{ 
+          var ffrom=edge.from;
+          var valor=edge.valor;
+          tpp.forEach((a)=>{
+              if(a.idn==ffrom)
+              {
+                res=parseInt(a.res)+parseInt(valor);
+                idn=edge.to;
+                tpp.push({idn,res});
+              }
+            });
+        });
+        tpp.forEach((a)=>{
+          var aid=a.idn;
+          var ares=a.res;
+          var ff=0;
+          if(fflag==0){
+            tppf.push({aid,ares});
+            fflag=1;
+          }
+          else{
+            tppf.forEach((af)=>{
+              if(af.aid==aid){
+                if(parseInt(af.ares)<parseInt(ares))
+                {
+                  af.ares=ares;
+                }
+                ff=1;
+              }
+            });
+            if(ff==0){
+              tppf.push({aid,ares});
+            }
+          }
+        });
+  
+        tppf.forEach((a)=>{
+          if(a.ares>max){
+            max=a.ares;
+            idm=a.aid;
+          }
+        });
+        ttp.push({idm,max});
+  
+      for(var ic=0;ic<tpp.length;ic++){
+        ttp.forEach((a)=>{
+          var iid=a.idm;
+          edges.forEach((edge)=>{
+              var tto=edge.to;
+              var valor=edge.valor;
+              if(iid==tto){
+                max=parseInt(a.max)-parseInt(valor);
+                idm=edge.from;
+                ttp.push({idm,max});
+              }
+          });
+        });
+      }
+        ttp.forEach((a)=>{
+          var aid=a.idm;
+          var ares=a.max;
+          var ff=0;
+          if(fflag==0){
+            ttpf.push({aid,ares});
+            fflag=1;
+          }
+          else{
+            ttpf.forEach((af)=>{
+              if(af.aid==aid){
+                if(parseFloat(af.ares)>=parseFloat(ares))
+                {
+                  af.ares=ares;
+                }
+                ff=1;
+              }
+            });
+            if(ff==0){
+              ttpf.push({aid,ares});
+            }
+          }
+        });      
+        nodes.forEach((node)=>{
+          tppf.forEach((a)=>{
+            ttpf.forEach((b)=>{
+              if(node.id==a.aid && node.id==b.aid){
+                nodes.update({id:node.id,ttp:a.ares,tpp:b.ares,title:"ttp:"+a.ares+" | tpp: "+b.ares}); 
+              }
+            });
+          });
+        });
+        
+        edges.forEach((edge)=>{
+          var vttp=0;
+          var vtpp=0;
+          var vto=edge.to;
+          var vfrom=edge.from;
+          var idee=edge.id;
+          var valor=0;
+          valor=parseInt(edge.valor);
+          nodes.forEach((node)=>{
+              if(node.id==vfrom){
+                vttp=parseInt(node.ttp);           
+              }
+              if(node.id==vto){
+                vtpp=parseInt(node.tpp);
+              }
+          });
+          var holg=vtpp-vttp-valor;
+          holguras.push({idee,holg,vtpp,vttp,valor});
+          edges.update({id:edge.id,sublabel1:"h="+holg});
+        });
+        console.log("hols");
+        console.log(holguras);
+        edges.forEach((edge)=>{
+        
+          if(edge.sublabel1=="h=0")
+          {
+            nodes.update({id:edge.from,color:{background:"#8AE35F"},label: cont});
+            auxa=parseInt(edge.label)+parseInt(cont);
+            cont=""+auxa+"";
+            edges.update({id:edge.id,label:edge.label+"\n"+edge.sublabel1,color:{color:"#8AE35F"}}); 
+            nodes.update({id:edge.to,color:{background:"#8AE35F"}, label: cont});
+            
+          }
+          else{
+            console.log("to:"+edge.to);
+            console.log("from:"+edge.from);
+            
+            nodes.update({id:edge.to,color:{background:"#939A9A"},label: edge.label});
+            edges.update({id:edge.id,label:edge.label+"\n"+edge.sublabel1});
+             
+          }
+         
+        });
+
+        nodes.forEach((node)=>{
+            console.log("node:"+node.id)
+            a=0;
+            edges.forEach((edge)=>{
+
+                if(node.id == edge.to){
+                    console.log("label"+node.label);
+                    if(edge.sublabel1 != "h=0"){
+                        b=parseInt(node.label)+parseInt(edge.label);
+                        console.log("RESULTADO:"+b);
+                    }
+                    
+                }
+                a++;
+                console.log(a+"edge:"+edge.to)
+            });
+          });
+        
+        
+      }
+      var a=0;
+      var b=0;
+      var auxa=0;
+      var conta="0";
+      var cont="0";
